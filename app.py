@@ -9,6 +9,7 @@ from streamlit_image_coordinates import streamlit_image_coordinates
 def load_colors():
     df = pd.read_csv("colors.csv")
     return df
+
 color_data = load_colors()
 st.write("🎨 Loaded Color Data Sample:")
 st.dataframe(color_data.head())
@@ -19,21 +20,25 @@ def get_color_name(R, G, B, color_data):
     closest_color = None
     for _, row in color_data.iterrows():
         try:
-           d = ((R - int(row['R']))**2 + (G - int(row['G']))**2 + (B - int(row['B']))**2) * 0.5
-
-           if d < min_dist:
+            d = ((R - int(row['R']))**2 + (G - int(row['G']))**2 + (B - int(row['B']))**2) * 0.5
+            if d < min_dist:
                 min_dist = d
                 closest_color = row
         except Exception as e:
             st.write(f"Error reading row: {row} - {e}")
-    return closest_color if closest_color is not None else {
-        'color_name': 'Unknown',
-        'hex': '#000000'
-    }
+    if closest_color is not None:
+        return {
+            'color_name': closest_color['color_name'],
+            'hex': closest_color['hex']
+        }
+    else:
+        return {
+            'color_name': 'Unknown',
+            'hex': '#000000'
+        }
 
 # Streamlit UI
 st.title("🎨 Color Detection from Image (No OpenCV)")
-
 
 uploaded_file = st.file_uploader("Upload an Image", type=["jpg", "jpeg", "png"])
 
@@ -48,13 +53,9 @@ if uploaded_file is not None:
         st.write(f"📍 Clicked Coordinates: ({x}, {y})")
 
         image_np = np.array(image)
-        if y < image_np.shape[0] and x < image_np.shape[1]:  # Ensure within bounds
+        if 0 <= y < image_np.shape[0] and 0 <= x < image_np.shape[1]:
             r, g, b = image_np[y, x]
             st.write(f"🎨 Clicked Pixel RGB: ({r}, {g}, {b})")
-
-            color_data = load_colors()
-            st.write("🎨 Loaded Color Data Sample:")
-            st.dataframe(color_data.head())
 
             color_info = get_color_name(r, g, b, color_data)
             hex_color = color_info['hex']
@@ -68,7 +69,4 @@ if uploaded_file is not None:
             <div style="width:100px; height:50px; background-color:{hex_color}; border:1px solid #000;"></div>
             """, unsafe_allow_html=True)
         else:
-            st.warning("Clicked outside image bounds.")
-   
-
-   
+            st.warning("⚠️ Clicked outside image bounds.")
