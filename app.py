@@ -19,8 +19,9 @@ def get_color_name(R, G, B, color_data):
     closest_color = None
     for _, row in color_data.iterrows():
         try:
-            d = ((R - int(row['R']))**2 + (G - int(row['G']))**2 + (B - int(row['B']))**2) ** 0.5  # Euclidean distance
-            if d < min_dist:
+           d = ((R - int(row['R']))**2 + (G - int(row['G']))**2 + (B - int(row['B']))**2) * 0.5
+
+           if d < min_dist:
                 min_dist = d
                 closest_color = row
         except Exception as e:
@@ -67,4 +68,7 @@ if uploaded_file is not None:
             <div style="width:100px; height:50px; background-color:{hex_color}; border:1px solid #000;"></div>
             """, unsafe_allow_html=True)
         else:
-            st.warning("Clicked outside image bounds.")
+            st.warning("Clicked outside image bounds.")
+   
+
+   
